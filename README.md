@@ -71,6 +71,20 @@ deb http://ports.ubuntu.com/ubuntu-ports/ xenial main restricted universe multiv
 
 ### OpenCV 4.0.1
 
+#### Requirements
+
+```
+sudo apt install -y \
+    python3.5-dev libgtk-3-dev \ libatlas-base-dev gfortran \
+    build-essential cmake unzip pkg-config \
+    libjpeg-dev libpng-dev libtiff-dev \
+    libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
+    libxvidcore-dev libx264-dev git pkg-config \
+    python3-numpy python3-pip libtbb2 libtbb-dev libjasper-dev libdc1394-22-dev
+```
+
+#### Make & Build
+
 Within the `opencv` source folder, create a `opencv/build/` directory and run `cmake`.  
 This is similar to the installation intructions provided [here](https://docs.opencv.org/4.0.1/d7/d9f/tutorial_linux_install.html)
 
