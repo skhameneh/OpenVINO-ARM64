@@ -67,7 +67,41 @@ deb http://ports.ubuntu.com/ubuntu-ports/ xenial main restricted universe multiv
 3. Run `sudo mount --rbind /dev /srv/chroot/bionic_armhr/dev` to allow USB access inside the schroot.
 
 
-## Compiling 
+## Compiling
+
+### OpenCV 4.0.1
+
+Within the `opencv` source folder, create a `opencv/build/` directory and run `cmake`.  
+This is similar to the installation intructions provided [here](https://docs.opencv.org/4.0.1/d7/d9f/tutorial_linux_install.html)
+
+Make sure the `opencv/build/` directory is empty.  If you have proviously generated scripts, artifacts can interefere.
+
+```
+cmake -D CMAKE_INSTALL_PREFIX=/usr/local \
+      -D PYTHON3_EXECUTABLE=/usr/bin/python3.5 \
+      -D PYTHON3_LIBRARY=/usr/lib/python3.5/config-3.5m-arm-linux-gnueabihf/libpython3.5m.so \
+      -D PYTHON3_INCLUDE_DIR=/usr/include/python3.5m \
+      -D PYTHON3_PACKAGES_PATH=/usr/lib/python3/dist-packages \
+      -D CMAKE_INSTALL_PREFIX=/usr/local \
+      -D WITH_INF_ENGINE=ON \
+      -D ENABLE_CXX11=ON \
+      -D PYTHON_DEFAULT_EXECUTABLE=/usr/bin/python3.5 \
+      -D BUILD_OPENCV_PYTHON3=yes \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DWITH_IPP=OFF \
+      -DBUILD_TESTS=OFF \
+      -DBUILD_PERF_TESTS=OFF \
+      -DENABLE_NEON=ON \
+      -DCPU_BASELINE="NEON" \
+      -DWITH_INF_ENGINE=ON \
+      -DINF_ENGINE_LIB_DIRS="/inference_engine_vpu_arm/deployment_tools/inference_engine/lib/raspbian_9/armv7l" \
+      -DINF_ENGINE_INCLUDE_DIRS="/inference_engine_vpu_arm/deployment_tools/inference_engine/include" \
+      -DCMAKE_FIND_ROOT_PATH="/inference_engine_vpu_arm/" \
+      -DENABLE_CXX11=ON ..
+```
+
+Notes:  
+The paths above assume `/inference_engine_vpu_arm/` exists in the root directory of the schroot.  This path may be `/srv/bionic_armhf/inference_engine_vpu_arm/` on the host.  Keep in mind the paths will be impacted by where you installed the schroot.  I recommend using absolute paths.
 
 ## Contributing
 
