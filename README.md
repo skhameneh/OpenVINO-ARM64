@@ -29,28 +29,93 @@ https://github.com/opencv/dldt/issues/3
 2. The Intel OpenVINO libraries only work with Python 2.7 and 3.5. Python 3.6 and 3.7 are not supported. Intel does not provide all sources at this time.
 3. Bionic does not have packages for Python 3.5, so Xenial package sources are needed to install Python 3.5.
 4. I suggest building OpenCV from source. The `cv2.so` provided by Intel may not work in all environments.
-5. Your [chroot] environment will need to load the Intel modules:
-    - `sudo cp -R ./inference_engine_vpu_arm/python/python3.5/armv7l/* /usr/local/lib/python3.5/dist-packages/`
-    - `sudo cp -R ./inference_engine_vpu_arm/deployment_tools/inference_engine/lib/raspbian_9/armv7l/* /usr/local/lib/python3.5/dist-packages/openvino/inference_engine/`
- - Use `export DISPLAY=:0` to enable GUI's inside the schroot
+5. Use `export DISPLAY=:0` to enable GUI's inside the schroot
 
 # Installation
 
-## 32-bit ARMHF Schroot
+## 1. Install prerequisites
 
-See:  
+```
+$ sudo apt install debootstrap schroot
+```
+
+See:
 https://wiki.debian.org/ArmHardFloatChroot  
 https://help.ubuntu.com/community/DebootstrapChroot
 
-**Ubuntu Bionic Schroot** (Recommended)  
+## 2. Create 32-bit ARMHF Ubuntu Bionic Schroot
+
 ```
-# Install the base environment, run:
-sudo debootstrap --include=build-essential,sudo,apt,nano --arch=armhf bionic /srv/chroot/bionic_armhf/ http://ports.ubuntu.com/ubuntu-ports/
+$ sudo debootstrap --include=build-essential,sudo,apt,nano --arch=armhf bionic /srv/chroot/bionic_armhf/ http://ports.ubuntu.com/ubuntu-ports/
+```
 
-# Enter the environment, run:
-schroot -e bionic_armhf
+Open the file `/etc/schroot/schroot.conf` and add the following lines:
 
-# Verify the following are in /etc/apt/sources.list
+```
+[bionic_armhf]
+description=bionic_armhf
+type=directory
+directory=/srv/chroot/bionic_armhf
+users=MYUSER
+```
+
+Replace "MYUSER" with your username.
+
+## 3. Download OpenVINO 2018 R5 and configure host/schroot environment
+
+Download OpenVINO 2018 R5 and copy the content of the archive into the schroot environment:
+
+```
+$ cd ~/Downloads
+$ wget http://download.01.org/openvinotoolkit/2018_R5/packages/l_openvino_toolkit_ie_p_2018.5.445.tgz
+$ tar -xf l_openvino_toolkit_ie_p_2018.5.445.tgz
+$ sudo cp -R ./inference_engine_vpu_arm /srv/chroot/bionic_armhf/
+```
+
+Add the user to the `users` group:
+
+```
+$ sudo usermod -a -G users "$(whoami)"
+```
+
+Add udev rules for the NCSx stick:
+
+```
+$ sh ./inference_engine_vpu_arm/install_dependencies/install_NCS_udev_rules.sh
+```
+
+Copy the OpenVINO binaries to the schroot environment:
+
+```
+$ sudo cp -R ./inference_engine_vpu_arm/python/python3.5/armv7l/* /usr/local/lib/python3.5/dist-packages/`
+$ sudo cp -R ./inference_engine_vpu_arm/deployment_tools/inference_engine/lib/raspbian_9/armv7l/* /usr/local/lib/python3.5/dist-packages/openvino/inference_engine/
+```
+
+Allow USB access inside the schroot environment:
+
+```
+$ sudo mount --rbind /dev /srv/chroot/bionic_armhf/dev
+```
+
+Enter the schroot environment:
+
+```
+$ schroot -c bionic_armhf
+```
+
+Your promt should now show "(bionic_armhf)" in front of your username. This indicates that you are now inside the schroot environment.
+**WARNING:** Make sure that you are really inside the schroot environment. Otherwise you will mess with the configuration of your host system!
+Note: Your user's home directory is automatically mapped to the schroot environment.
+
+Add the user to the `users` group:
+
+```
+$ sudo usermod -a -G users "$(whoami)"
+```
+
+Open the file `/etc/apt/sources.list` and replace its content with the following:
+
+```
 deb http://ports.ubuntu.com/ubuntu-ports/ bionic main restricted universe multiverse
 deb-src http://ports.ubuntu.com/ubuntu-ports/ bionic main restricted universe multiverse
 deb http://ports.ubuntu.com/ubuntu-ports/ bionic-security main restricted universe multiverse
@@ -60,37 +125,50 @@ deb-src http://ports.ubuntu.com/ubuntu-ports/ bionic-updates main restricted uni
 deb http://ports.ubuntu.com/ubuntu-ports/ xenial main restricted universe multiverse
 ```
 
-**Notes**  
-1. Use `export DISPLAY=:0` to enable display and GUI inside the schroot.
-2. `xenial` source is added to Bionic for fetching `python3.5`
-3. Run `sudo mount --rbind /dev /srv/chroot/bionic_armhr/dev` to allow USB access inside the schroot.
+## 4. Compile OpenCV 4.0.1 from source
 
-
-## Compiling
-
-### OpenCV 4.0.1
-
-#### Requirements
+### Prerequisites
 
 ```
-sudo apt install -y \
-    python3.5-dev libgtk-3-dev libatlas-base-dev gfortran \
+$ sudo apt install -y \
+    wget python3.5-dev libgtk-3-dev libatlas-base-dev gfortran \
     build-essential cmake unzip pkg-config \
     libjpeg-dev libpng-dev libtiff-dev \
     libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
     libxvidcore-dev libx264-dev git pkg-config \
-    python3-numpy python3-pip libtbb2 libtbb-dev libjasper-dev libdc1394-22-dev
+    python3-pip libtbb2 libtbb-dev libjasper-dev libdc1394-22-dev
 ```
 
-#### Make & Build
-
-Within the `opencv` source folder, create a `opencv/build/` directory and run `cmake`.  
-This is similar to the installation intructions provided [here](https://docs.opencv.org/4.0.1/d7/d9f/tutorial_linux_install.html)
-
-Make sure the `opencv/build/` directory is empty.  If you have proviously generated scripts, artifacts can interefere.
+Create a link to Python 3.5:
 
 ```
-cmake -D CMAKE_INSTALL_PREFIX=/usr/local \
+$ sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.5 100
+```
+
+Install Numpy:
+
+```
+$ sudo python3 -m pip install numpy
+```
+
+### Download and prepare OpenCV 4.0.1
+
+```
+$ cd ~/Downloads
+$ wget -o opencv.zip https://github.com/opencv/opencv/archive/4.0.1.zip
+$ wget -o opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/4.0.1.zip
+$ unzip opencv.zip
+$ unzip opencv_contrib.zip
+$ mv opencv-4.0.1/ opencv/
+$ mv opencv_contrib-4.0.1/ opencv_contrib/
+```
+
+### Compile and install OpenCV 4.0.1
+
+```
+$ mkdir -p opencv/build
+$ cd opencv/build
+$ cmake -D CMAKE_INSTALL_PREFIX=/usr/local \
       -D PYTHON3_EXECUTABLE=/usr/bin/python3.5 \
       -D PYTHON3_LIBRARY=/usr/lib/python3.5/config-3.5m-arm-linux-gnueabihf/libpython3.5m.so \
       -D PYTHON3_INCLUDE_DIR=/usr/include/python3.5m \
@@ -100,21 +178,38 @@ cmake -D CMAKE_INSTALL_PREFIX=/usr/local \
       -D ENABLE_CXX11=ON \
       -D PYTHON_DEFAULT_EXECUTABLE=/usr/bin/python3.5 \
       -D BUILD_OPENCV_PYTHON3=yes \
+      -D OPENCV_EXTRA_MODULES_PATH=~/Downloads/opencv_contrib/modules
       -DCMAKE_BUILD_TYPE=Release \
       -DWITH_IPP=OFF \
       -DBUILD_TESTS=OFF \
       -DBUILD_PERF_TESTS=OFF \
-      -DENABLE_NEON=ON \
-      -DCPU_BASELINE="NEON" \
+      -DENABLE_NEON=OFF \
       -DWITH_INF_ENGINE=ON \
       -DINF_ENGINE_LIB_DIRS="/inference_engine_vpu_arm/deployment_tools/inference_engine/lib/raspbian_9/armv7l" \
       -DINF_ENGINE_INCLUDE_DIRS="/inference_engine_vpu_arm/deployment_tools/inference_engine/include" \
       -DCMAKE_FIND_ROOT_PATH="/inference_engine_vpu_arm/" \
       -DENABLE_CXX11=ON ..
+$ make -j4
+$ sudo make install
 ```
 
-Notes:  
-The paths above assume `/inference_engine_vpu_arm/` exists in the root directory of the schroot.  This path may be `/srv/bionic_armhf/inference_engine_vpu_arm/` on the host.  Keep in mind the paths will be impacted by where you installed the schroot.  I recommend using absolute paths.
+## 5. Test
+
+Test the face detection demo from the official documentation:
+
+https://software.intel.com/en-us/articles/OpenVINO-Install-RaspberryPI#face-detection-model
+
+If the face detection demo is not able to find the attached NCSx stick you have to exit from the schroot and log out from the host system and login in again.
+
+## Notes
+
+Use 
+
+```
+$ export DISPLAY=:0
+```
+
+to enable display and GUI inside the schroot.
 
 ## Contributing
 
