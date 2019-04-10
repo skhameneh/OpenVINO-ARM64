@@ -29,7 +29,6 @@ https://github.com/opencv/dldt/issues/3
 2. The Intel OpenVINO libraries only work with Python 2.7 and 3.5. Python 3.6 and 3.7 are not supported. Intel does not provide all sources at this time.
 3. Bionic does not have packages for Python 3.5, so Xenial package sources are needed to install Python 3.5.
 4. I suggest building OpenCV from source. The `cv2.so` provided by Intel may not work in all environments.
-5. Use `export DISPLAY=:0` to enable GUI's inside the schroot
 
 # Installation
 
