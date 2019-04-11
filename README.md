@@ -102,8 +102,10 @@ Enter the schroot environment:
 $ schroot -c bionic_armhf
 ```
 
-Your promt should now show "(bionic_armhf)" in front of your username. This indicates that you are now inside the schroot environment.
+Your prompt should now show "(bionic_armhf)" in front of your username. This indicates that you are now inside the schroot environment.
+
 **WARNING:** Make sure that you are really inside the schroot environment. Otherwise you will mess with the configuration of your host system!
+
 Note: Your user's home directory is automatically mapped to the schroot environment.
 
 Add the user to the `users` group:
