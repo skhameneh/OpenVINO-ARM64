@@ -14,21 +14,17 @@ https://github.com/opencv/dldt/issues/3
 
 # Version & Compatibility Notes
 
-## OpenCV 4.0.1 and OpenVINO 2018 R5
+## Ubuntu, OpenCV 4.1.0 and OpenVINO 2019 R1
 
-1. OpenVINO only provides 32-bit ARM libraries for Raspbian.
+1. OpenVINO only provides 32-bit 'armhf' libraries for Raspbian ('armhf' = Arm port using the hard-float ABI).
 2. OpenVINO binaries are only compiled for Python 2.7 and Python 3.5.
 3. Python 3 is preferred over Python 2.7 because of [this](https://pythonclock.org).
-4. OpenVINO R5 comes with OpenCV 4.0.1 compiled for Raspbian ARMHF.
-5. Raspbian ARMHF modules are not fully compatible with other Linux distributions (broken links, dependencies, naming/version hell)
-6. ...
-
-## Ubuntu, OpenCV 4, and OpenVINO 2018 R5
-
-1. Ubuntu is recommended over Debian Stretch. `numpy` for Python 3.x on Debian Stretch requires GLIBC 2.27+ (official repos only provide GLIBC 2.24)
-2. The Intel OpenVINO libraries only work with Python 2.7 and 3.5. Python 3.6 and 3.7 are not supported. Intel does not provide all sources at this time.
-3. Bionic does not have packages for Python 3.5, so Xenial package sources are needed to install Python 3.5.
-4. I suggest building OpenCV from source. The `cv2.so` provided by Intel may not work in all environments.
+4. OpenVINO R5 comes with OpenCV 4.1.0 compiled for Raspbian.
+5. Raspbian armhf modules are not fully compatible with other Linux distributions (broken links, dependencies, naming/version hell)
+6. Ubuntu is recommended over Debian Stretch. `numpy` for Python 3.x on Debian Stretch requires GLIBC 2.27+ (official repos only provide GLIBC 2.24)
+7. The Intel OpenVINO libraries only work with Python 2.7 and 3.5. Python 3.6 and 3.7 are not supported. Intel does not provide all sources at this time.
+8. Ubuntu 18.04 (Bionic) does not have packages for Python 3.5, so Ubuntu 16.04 (Xenial) package sources are needed to install Python 3.5.
+9. I suggest building OpenCV from source. The `cv2.so` provided by Intel may not work in all environments.
 
 # Installation
 
@@ -42,7 +38,7 @@ See:
 https://wiki.debian.org/ArmHardFloatChroot  
 https://help.ubuntu.com/community/DebootstrapChroot
 
-## 2. Create 32-bit ARMHF Ubuntu Bionic Schroot
+## 2. Create 32-bit armhf Ubuntu 18.04 (Bionic) schroot
 
 ```
 $ sudo debootstrap --include=build-essential,sudo,apt,nano --arch=armhf bionic /srv/chroot/bionic_armhf/ http://ports.ubuntu.com/ubuntu-ports/
@@ -60,14 +56,14 @@ users=MYUSER
 
 Replace "MYUSER" with your username.
 
-## 3. Download OpenVINO 2018 R5 and configure host/schroot environment
+## 3. Download OpenVINO 2019 R1 and configure host/schroot environment
 
-Download OpenVINO 2018 R5 and copy the content of the archive into the schroot environment:
+Download OpenVINO 2019 R1 and copy the content of the archive into the schroot environment:
 
 ```
 $ cd ~/Downloads
-$ wget http://download.01.org/openvinotoolkit/2018_R5/packages/l_openvino_toolkit_ie_p_2018.5.445.tgz
-$ tar -xf l_openvino_toolkit_ie_p_2018.5.445.tgz
+$ wget https://download.01.org/opencv/2019/openvinotoolkit/l_openvino_toolkit_raspbi_p_2019.1.094.tgz
+$ tar -xf l_openvino_toolkit_raspbi_p_2019.1.094.tgz
 $ sudo cp -R ./inference_engine_vpu_arm /srv/chroot/bionic_armhf/
 ```
 
@@ -86,8 +82,9 @@ $ sh ./inference_engine_vpu_arm/install_dependencies/install_NCS_udev_rules.sh
 Copy the OpenVINO binaries to the schroot environment:
 
 ```
-$ sudo cp -R ./inference_engine_vpu_arm/python/python3.5/armv7l/* /usr/local/lib/python3.5/dist-packages/`
-$ sudo cp -R ./inference_engine_vpu_arm/deployment_tools/inference_engine/lib/raspbian_9/armv7l/* /usr/local/lib/python3.5/dist-packages/openvino/inference_engine/
+$ sudo mkdir -p /srv/chroot/bionic_armhf/usr/local/lib/python3.5/dist-packages/openvino/inference_engine
+$ sudo cp -R ./inference_engine_vpu_arm/python/python3.5/armv7l/* /srv/chroot/bionic_armhf/usr/local/lib/python3.5/dist-packages/`
+$ sudo cp -R ./inference_engine_vpu_arm/deployment_tools/inference_engine/lib/armv7l/* /srv/chroot/bionic_armhf/usr/local/lib/python3.5/dist-packages/openvino/inference_engine/
 ```
 
 Allow USB access inside the schroot environment:
@@ -126,11 +123,12 @@ deb-src http://ports.ubuntu.com/ubuntu-ports/ bionic-updates main restricted uni
 deb http://ports.ubuntu.com/ubuntu-ports/ xenial main restricted universe multiverse
 ```
 
-## 4. Compile OpenCV 4.0.1 from source
+## 4. Compile OpenCV 4.1.0 from source
 
 ### Prerequisites
 
 ```
+$ sudo apt update
 $ sudo apt install -y \
     wget python3.5-dev libgtk-3-dev libatlas-base-dev gfortran \
     build-essential cmake unzip pkg-config \
@@ -138,6 +136,7 @@ $ sudo apt install -y \
     libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
     libxvidcore-dev libx264-dev git pkg-config \
     python3-pip libtbb2 libtbb-dev libjasper-dev libdc1394-22-dev
+$ sudo apt clean
 ```
 
 Create a link to Python 3.5:
@@ -152,41 +151,41 @@ Install Numpy:
 $ sudo python3 -m pip install numpy
 ```
 
-### Download and prepare OpenCV 4.0.1
+### Download and prepare OpenCV 4.1.0
 
 ```
 $ cd ~/Downloads
-$ wget -O opencv.zip https://github.com/opencv/opencv/archive/4.0.1.zip
-$ wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/4.0.1.zip
+$ wget -O opencv.zip https://github.com/opencv/opencv/archive/4.1.0.zip
+$ wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/4.1.0.zip
 $ unzip opencv.zip
 $ unzip opencv_contrib.zip
-$ mv opencv-4.0.1/ opencv/
-$ mv opencv_contrib-4.0.1/ opencv_contrib/
+$ mv opencv-4.1.0/ opencv/
+$ mv opencv_contrib-4.1.0/ opencv_contrib/
 ```
 
-### Compile and install OpenCV 4.0.1
+### Compile and install OpenCV 4.1.0
 
 ```
 $ mkdir -p opencv/build
 $ cd opencv/build
 $ cmake -D CMAKE_INSTALL_PREFIX=/usr/local \
-      -D PYTHON3_EXECUTABLE=/usr/bin/python3.5 \
-      -D PYTHON3_LIBRARY=/usr/lib/python3.5/config-3.5m-arm-linux-gnueabihf/libpython3.5m.so \
-      -D PYTHON3_INCLUDE_DIR=/usr/include/python3.5m \
-      -D PYTHON3_PACKAGES_PATH=/usr/lib/python3/dist-packages \
-      -D CMAKE_INSTALL_PREFIX=/usr/local \
-      -D WITH_INF_ENGINE=ON \
-      -D ENABLE_CXX11=ON \
-      -D PYTHON_DEFAULT_EXECUTABLE=/usr/bin/python3.5 \
-      -D BUILD_OPENCV_PYTHON3=yes \
-      -D OPENCV_EXTRA_MODULES_PATH=~/Downloads/opencv_contrib/modules \
+      -DPYTHON3_EXECUTABLE=/usr/bin/python3.5 \
+      -DPYTHON3_LIBRARY=/usr/lib/python3.5/config-3.5m-arm-linux-gnueabihf/libpython3.5m.so \
+      -DPYTHON3_INCLUDE_DIR=/usr/include/python3.5m \
+      -DPYTHON3_PACKAGES_PATH=/usr/lib/python3/dist-packages \
+      -DCMAKE_INSTALL_PREFIX=/usr/local \
+      -DWITH_INF_ENGINE=ON \
+      -DENABLE_CXX11=ON \
+      -DPYTHON_DEFAULT_EXECUTABLE=/usr/bin/python3.5 \
+      -DBUILD_OPENCV_PYTHON3=yes \
+      -DOPENCV_EXTRA_MODULES_PATH=~/Downloads/opencv_contrib/modules \
       -DCMAKE_BUILD_TYPE=Release \
       -DWITH_IPP=OFF \
       -DBUILD_TESTS=OFF \
       -DBUILD_PERF_TESTS=OFF \
       -DENABLE_NEON=OFF \
       -DWITH_INF_ENGINE=ON \
-      -DINF_ENGINE_LIB_DIRS="/inference_engine_vpu_arm/deployment_tools/inference_engine/lib/raspbian_9/armv7l" \
+      -DINF_ENGINE_LIB_DIRS="/inference_engine_vpu_arm/deployment_tools/inference_engine/lib/armv7l" \
       -DINF_ENGINE_INCLUDE_DIRS="/inference_engine_vpu_arm/deployment_tools/inference_engine/include" \
       -DCMAKE_FIND_ROOT_PATH="/inference_engine_vpu_arm/" \
       -DENABLE_CXX11=ON ..
@@ -194,11 +193,13 @@ $ make -j4
 $ sudo make install
 ```
 
+Note: If this fails due to some strange error it is most certainly caused by the make process running out of memory. Consider creating a swap file to extend the available memory.
+
 ## 5. Test
 
 Test the face detection demo from the official documentation:
 
-https://software.intel.com/en-us/articles/OpenVINO-Install-RaspberryPI#face-detection-model
+https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_raspbian.html#run-inference-opencv
 
 If the face detection demo is not able to find the attached NCSx stick you have to exit from the schroot and log out from the host system and login in again.
 
