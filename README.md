@@ -1,5 +1,3 @@
-Notice: This is a **work in progress**, not all sections are complete.
-
 # OpenVINO-ARM64
 OpenVINO ARM64 Notes
 
@@ -14,17 +12,15 @@ https://github.com/opencv/dldt/issues/3
 
 # Version & Compatibility Notes
 
-## Ubuntu, OpenCV 4.1.0 and OpenVINO 2019 R1
+## Ubuntu, OpenCV 4.1.1 and OpenVINO 2019 R2
 
 1. OpenVINO only provides 32-bit 'armhf' libraries for Raspbian ('armhf' = Arm port using the hard-float ABI).
-2. OpenVINO binaries are only compiled for Python 2.7 and Python 3.5.
+2. OpenVINO binaries are only compiled for Python 2.7 and Python 3.5/3.7.
 3. Python 3 is preferred over Python 2.7 because of [this](https://pythonclock.org).
-4. OpenVINO R5 comes with OpenCV 4.1.0 compiled for Raspbian.
-5. Raspbian armhf modules are not fully compatible with other Linux distributions (broken links, dependencies, naming/version hell)
-6. Ubuntu is recommended over Debian Stretch. `numpy` for Python 3.x on Debian Stretch requires GLIBC 2.27+ (official repos only provide GLIBC 2.24)
-7. The Intel OpenVINO libraries only work with Python 2.7 and 3.5. Python 3.6 and 3.7 are not supported. Intel does not provide all sources at this time.
-8. Ubuntu 18.04 (Bionic) does not have packages for Python 3.5, so Ubuntu 16.04 (Xenial) package sources are needed to install Python 3.5.
-9. I suggest building OpenCV from source. The `cv2.so` provided by Intel may not work in all environments.
+4. OpenVINO R5 comes with OpenCV 4.1.1 compiled for Raspbian.
+5. Raspbian armhf modules are not fully compatible with other Linux distributions (broken links, dependencies, naming/version hell).
+6. Intel does not provide all sources for the OpenVINO libraries at this time.
+7. I suggest building OpenCV from source. The `cv2.so` provided by Intel may not work in all environments.
 
 # Installation
 
@@ -38,33 +34,33 @@ See:
 https://wiki.debian.org/ArmHardFloatChroot  
 https://help.ubuntu.com/community/DebootstrapChroot
 
-## 2. Create 32-bit armhf Ubuntu 18.04 (Bionic) schroot
+## 2. Create 32-bit armhf Debian 10 (Buster) schroot
 
 ```
-$ sudo debootstrap --include=build-essential,sudo,apt,nano --arch=armhf bionic /srv/chroot/bionic_armhf/ http://ports.ubuntu.com/ubuntu-ports/
+$ sudo debootstrap --include=build-essential,sudo,apt,nano --arch=armhf buster /srv/chroot/buster_armhf/ http://ftp.debian.org/debian
 ```
 
 Open the file `/etc/schroot/schroot.conf` and add the following lines:
 
 ```
-[bionic_armhf]
-description=bionic_armhf
+[buster_armhf]
+description=buster_armhf
 type=directory
-directory=/srv/chroot/bionic_armhf
+directory=/srv/chroot/buster_armhf
 users=MYUSER
 ```
 
 Replace "MYUSER" with your username.
 
-## 3. Download OpenVINO 2019 R1 and configure host/schroot environment
+## 3. Download OpenVINO 2019 R2 and configure host/schroot environment
 
-Download OpenVINO 2019 R1 and copy the content of the archive into the schroot environment:
+Download OpenVINO 2019 R2 and copy the content of the archive into the schroot environment:
 
 ```
 $ cd ~/Downloads
-$ wget https://download.01.org/opencv/2019/openvinotoolkit/l_openvino_toolkit_raspbi_p_2019.1.094.tgz
-$ tar -xf l_openvino_toolkit_raspbi_p_2019.1.094.tgz
-$ sudo cp -R ./inference_engine_vpu_arm /srv/chroot/bionic_armhf/
+$ wget https://download.01.org/opencv/2019/openvinotoolkit/R2/l_openvino_toolkit_runtime_raspbian_p_2019.2.242.tgz
+$ tar -xf l_openvino_toolkit_runtime_raspbian_p_2019.2.242.tgz
+$ sudo cp -R ./l_openvino_toolkit_runtime_raspbian_p_2019.2.242 /srv/chroot/buster_armhf/
 ```
 
 Add the user to the `users` group:
@@ -76,30 +72,31 @@ $ sudo usermod -a -G users "$(whoami)"
 Add udev rules for the NCSx stick:
 
 ```
-$ sh ./inference_engine_vpu_arm/install_dependencies/install_NCS_udev_rules.sh
+$ source ./l_openvino_toolkit_runtime_raspbian_p_2019.2.242/bin/setupvars.sh
+$ sh ./l_openvino_toolkit_runtime_raspbian_p_2019.2.242/install_dependencies/install_NCS_udev_rules.sh
 ```
 
 Copy the OpenVINO binaries to the schroot environment:
 
 ```
-$ sudo mkdir -p /srv/chroot/bionic_armhf/usr/local/lib/python3.5/dist-packages/openvino/inference_engine
-$ sudo cp -R ./inference_engine_vpu_arm/python/python3.5/armv7l/* /srv/chroot/bionic_armhf/usr/local/lib/python3.5/dist-packages/`
-$ sudo cp -R ./inference_engine_vpu_arm/deployment_tools/inference_engine/lib/armv7l/* /srv/chroot/bionic_armhf/usr/local/lib/python3.5/dist-packages/openvino/inference_engine/
+$ sudo mkdir -p /srv/chroot/buster_armhf/usr/local/lib/python3.7/dist-packages
+$ sudo cp -R ./l_openvino_toolkit_runtime_raspbian_p_2019.2.242/python/python3.7/* /srv/chroot/buster_armhf/usr/local/lib/python3.7/dist-packages/
+$ sudo cp -R ./l_openvino_toolkit_runtime_raspbian_p_2019.2.242/deployment_tools/inference_engine/lib/armv7l/* /srv/chroot/buster_armhf/usr/local/lib/python3.7/dist-packages/openvino/inference_engine/
 ```
 
 Allow USB access inside the schroot environment:
 
 ```
-$ sudo mount --rbind /dev /srv/chroot/bionic_armhf/dev
+$ sudo mount --rbind /dev /srv/chroot/buster_armhf/dev
 ```
 
 Enter the schroot environment:
 
 ```
-$ schroot -c bionic_armhf
+$ schroot -c buster_armhf
 ```
 
-Your prompt should now show "(bionic_armhf)" in front of your username. This indicates that you are now inside the schroot environment.
+Your prompt should now show "(buster_armhf)" in front of your username. This indicates that you are now inside the schroot environment.
 
 **WARNING:** Make sure that you are really inside the schroot environment. Otherwise you will mess with the configuration of your host system!
 
@@ -111,38 +108,19 @@ Add the user to the `users` group:
 $ sudo usermod -a -G users "$(whoami)"
 ```
 
-Open the file `/etc/apt/sources.list` and replace its content with the following:
-
-```
-deb http://ports.ubuntu.com/ubuntu-ports/ bionic main restricted universe multiverse
-deb-src http://ports.ubuntu.com/ubuntu-ports/ bionic main restricted universe multiverse
-deb http://ports.ubuntu.com/ubuntu-ports/ bionic-security main restricted universe multiverse
-deb-src http://ports.ubuntu.com/ubuntu-ports/ bionic-security main restricted universe multiverse
-deb http://ports.ubuntu.com/ubuntu-ports/ bionic-updates main restricted universe multiverse
-deb-src http://ports.ubuntu.com/ubuntu-ports/ bionic-updates main restricted universe multiverse
-deb http://ports.ubuntu.com/ubuntu-ports/ xenial main restricted universe multiverse
-```
-
-## 4. Compile OpenCV 4.1.0 from source
+## 4. Compile OpenCV 4.1.1 from source
 
 ### Prerequisites
 
 ```
 $ sudo apt update
-$ sudo apt install -y \
-    wget python3.5-dev libgtk-3-dev libatlas-base-dev gfortran \
+$ sudo apt install wget python3-dev libgtk-3-dev libatlas-base-dev gfortran \
     build-essential cmake unzip pkg-config \
     libjpeg-dev libpng-dev libtiff-dev \
     libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
     libxvidcore-dev libx264-dev git pkg-config \
-    python3-pip libtbb2 libtbb-dev libjasper-dev libdc1394-22-dev
+    python3-pip libtbb2 libtbb-dev libdc1394-22-dev
 $ sudo apt clean
-```
-
-Create a link to Python 3.5:
-
-```
-$ sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.5 100
 ```
 
 Install Numpy:
@@ -151,43 +129,43 @@ Install Numpy:
 $ sudo python3 -m pip install numpy
 ```
 
-### Download and prepare OpenCV 4.1.0
+### Download and prepare OpenCV 4.1.1
 
 ```
 $ cd ~/Downloads
-$ wget -O opencv.zip https://github.com/opencv/opencv/archive/4.1.0.zip
-$ wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/4.1.0.zip
+$ wget -O opencv.zip https://github.com/opencv/opencv/archive/4.1.1.zip
+$ wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/4.1.1.zip
 $ unzip opencv.zip
 $ unzip opencv_contrib.zip
-$ mv opencv-4.1.0/ opencv/
-$ mv opencv_contrib-4.1.0/ opencv_contrib/
+$ mv opencv-4.1.1/ opencv/
+$ mv opencv_contrib-4.1.1/ opencv_contrib/
 ```
 
-### Compile and install OpenCV 4.1.0
+### Compile and install OpenCV 4.1.1
 
 ```
 $ mkdir -p opencv/build
 $ cd opencv/build
 $ cmake -D CMAKE_INSTALL_PREFIX=/usr/local \
-      -DPYTHON3_EXECUTABLE=/usr/bin/python3.5 \
-      -DPYTHON3_LIBRARY=/usr/lib/python3.5/config-3.5m-arm-linux-gnueabihf/libpython3.5m.so \
-      -DPYTHON3_INCLUDE_DIR=/usr/include/python3.5m \
+      -DPYTHON3_EXECUTABLE=/usr/bin/python3 \
+      -DPYTHON3_LIBRARY=/usr/lib/python3.7/config-3.7m-arm-linux-gnueabihf/libpython3.7m.so \
+      -DPYTHON3_INCLUDE_DIR=/usr/include/python3.7m \
       -DPYTHON3_PACKAGES_PATH=/usr/lib/python3/dist-packages \
       -DCMAKE_INSTALL_PREFIX=/usr/local \
       -DWITH_INF_ENGINE=ON \
       -DENABLE_CXX11=ON \
-      -DPYTHON_DEFAULT_EXECUTABLE=/usr/bin/python3.5 \
+      -DPYTHON_DEFAULT_EXECUTABLE=/usr/bin/python3 \
       -DBUILD_OPENCV_PYTHON3=yes \
       -DOPENCV_EXTRA_MODULES_PATH=~/Downloads/opencv_contrib/modules \
       -DCMAKE_BUILD_TYPE=Release \
       -DWITH_IPP=OFF \
       -DBUILD_TESTS=OFF \
       -DBUILD_PERF_TESTS=OFF \
-      -DENABLE_NEON=OFF \
+      -DENABLE_NEON=ON \
       -DWITH_INF_ENGINE=ON \
-      -DINF_ENGINE_LIB_DIRS="/inference_engine_vpu_arm/deployment_tools/inference_engine/lib/armv7l" \
-      -DINF_ENGINE_INCLUDE_DIRS="/inference_engine_vpu_arm/deployment_tools/inference_engine/include" \
-      -DCMAKE_FIND_ROOT_PATH="/inference_engine_vpu_arm/" \
+      -DINF_ENGINE_LIB_DIRS="/l_openvino_toolkit_runtime_raspbian_p_2019.2.242/deployment_tools/inference_engine/lib/armv7l" \
+      -DINF_ENGINE_INCLUDE_DIRS="/l_openvino_toolkit_runtime_raspbian_p_2019.2.242/deployment_tools/inference_engine/include" \
+      -DCMAKE_FIND_ROOT_PATH="/l_openvino_toolkit_runtime_raspbian_p_2019.2.242/" \
       -DENABLE_CXX11=ON ..
 $ make -j4
 $ sudo make install
