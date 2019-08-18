@@ -147,26 +147,25 @@ $ mv opencv_contrib-4.1.1/ opencv_contrib/
 $ mkdir -p opencv/build
 $ cd opencv/build
 $ cmake -D CMAKE_INSTALL_PREFIX=/usr/local \
-      -DPYTHON3_EXECUTABLE=/usr/bin/python3 \
-      -DPYTHON3_LIBRARY=/usr/lib/python3.7/config-3.7m-arm-linux-gnueabihf/libpython3.7m.so \
-      -DPYTHON3_INCLUDE_DIR=/usr/include/python3.7m \
-      -DPYTHON3_PACKAGES_PATH=/usr/lib/python3/dist-packages \
-      -DCMAKE_INSTALL_PREFIX=/usr/local \
-      -DWITH_INF_ENGINE=ON \
-      -DENABLE_CXX11=ON \
-      -DPYTHON_DEFAULT_EXECUTABLE=/usr/bin/python3 \
-      -DBUILD_OPENCV_PYTHON3=yes \
-      -DOPENCV_EXTRA_MODULES_PATH=~/Downloads/opencv_contrib/modules \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DWITH_IPP=OFF \
-      -DBUILD_TESTS=OFF \
-      -DBUILD_PERF_TESTS=OFF \
-      -DENABLE_NEON=ON \
-      -DWITH_INF_ENGINE=ON \
-      -DINF_ENGINE_LIB_DIRS="/l_openvino_toolkit_runtime_raspbian_p_2019.2.242/deployment_tools/inference_engine/lib/armv7l" \
-      -DINF_ENGINE_INCLUDE_DIRS="/l_openvino_toolkit_runtime_raspbian_p_2019.2.242/deployment_tools/inference_engine/include" \
-      -DCMAKE_FIND_ROOT_PATH="/l_openvino_toolkit_runtime_raspbian_p_2019.2.242/" \
-      -DENABLE_CXX11=ON ..
+      -D PYTHON3_EXECUTABLE=/usr/bin/python3 \
+      -D PYTHON3_LIBRARY=/usr/lib/python3.7/config-3.7m-arm-linux-gnueabihf/libpython3.7m.so \
+      -D PYTHON3_INCLUDE_DIR=/usr/include/python3.7m \
+      -D PYTHON3_PACKAGES_PATH=/usr/lib/python3/dist-packages \
+      -D PYTHON_DEFAULT_EXECUTABLE=/usr/bin/python3 \
+      -D BUILD_OPENCV_PYTHON3=yes \
+      -D OPENCV_EXTRA_MODULES_PATH=~/Downloads/opencv_contrib/modules \
+      -D CMAKE_BUILD_TYPE=Release \
+      -D WITH_IPP=OFF \
+      -D BUILD_TESTS=OFF \
+      -D BUILD_PERF_TESTS=OFF \
+      -D BUILD_EXAMPLES=OFF \
+      -D ENABLE_PRECOMPILED_HEADERS=OFF \
+      -D ENABLE_NEON=ON \
+      -D WITH_INF_ENGINE=ON \
+      -D INF_ENGINE_LIB_DIRS="/l_openvino_toolkit_runtime_raspbian_p_2019.2.242/deployment_tools/inference_engine/lib/armv7l" \
+      -D INF_ENGINE_INCLUDE_DIRS="/l_openvino_toolkit_runtime_raspbian_p_2019.2.242/deployment_tools/inference_engine/include" \
+      -D CMAKE_FIND_ROOT_PATH="/l_openvino_toolkit_runtime_raspbian_p_2019.2.242/" \
+      -D ENABLE_CXX11=ON ..
 $ make -j4
 $ sudo make install
 ```
