@@ -193,13 +193,14 @@ to enable display and GUI inside the schroot environment.
 2. If you see a message like
 
 ```
-libinference_engine.so: cannot open shared object file: No such file or directory
+error: (-215:Assertion failed) in function 'initPlugin'
+> Failed to initialize Inference Engine backend: Cannot find plugin to use :Tried load plugin : myriadPlugin,  error: Plugin myriadPlugin cannot be loaded: cannot load plugin: myriadPlugin from : Cannot load library 'libmyriadPlugin.so': libmyriadPlugin.so: cannot open shared object file: No such file or directory, skipping
 ```
 
-while trying to execute a Python script inside the schroot environment, you need to add the path to the environment variable LD_LIBRARY_PATH. If you want to do this permenently just run the following command from inside (!) the schroot environment:
+while trying to execute a Python script inside the schroot environment, you need to set the environment variable LD_LIBRARY_PATH. Run the following command from inside the schroot environment:
 
 ```
-echo 'LD_LIBRARY_PATH="/usr/local/lib/python3.7/dist-packages/openvino/inference_engine"' | sudo tee -a /etc/profile
+$ export LD_LIBRARY_PATH="/usr/local/lib/python3.7/dist-packages/openvino/inference_engine"
 ```
 
 ## Contributing
