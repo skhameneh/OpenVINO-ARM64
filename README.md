@@ -182,13 +182,25 @@ If the face detection demo is not able to find the attached NCSx stick you have 
 
 ## Notes
 
-Use 
+1. Use 
 
 ```
 $ export DISPLAY=:0
 ```
 
-to enable display and GUI inside the schroot.
+to enable display and GUI inside the schroot environment.
+
+2. If you see a message like
+
+```
+libinference_engine.so: cannot open shared object file: No such file or directory
+```
+
+while trying to execute a Python script inside the schroot environment, you need to add the path to the environment variable LD_LIBRARY_PATH. If you want to do this permenently just run the following command from inside (!) the schroot environment:
+
+```
+echo 'LD_LIBRARY_PATH="/usr/local/lib/python3.7/dist-packages/openvino/inference_engine"' | sudo tee -a /etc/profile
+```
 
 ## Contributing
 
