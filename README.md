@@ -202,6 +202,14 @@ while trying to execute a Python script inside the schroot environment, you need
 $ export LD_LIBRARY_PATH="/usr/local/lib/python3.7/dist-packages/openvino/inference_engine"
 ```
 
+3. Beware that the schroot environment does not align the time zone settings with the host system. If you want to set the time zone run
+
+```
+$ sudo dpkg-reconfigure tzdata
+```
+
+while you are inside the schroot environment.
+
 ## Contributing
 
 Feel free to fork and create a pull request or an issue if you have additional materials to add.
