@@ -146,20 +146,17 @@ $ mv opencv_contrib-4.1.2/ opencv_contrib/
 $ mkdir -p opencv/build
 $ cd opencv/build
 $ cmake -D CMAKE_INSTALL_PREFIX=/usr/local \
-      -D PYTHON3_EXECUTABLE=/usr/bin/python3 \
-      -D PYTHON3_LIBRARY=/usr/lib/python3.7/config-3.7m-arm-linux-gnueabihf/libpython3.7m.so \
-      -D PYTHON3_INCLUDE_DIR=/usr/include/python3.7m \
-      -D PYTHON3_PACKAGES_PATH=/usr/lib/python3/dist-packages \
-      -D PYTHON_DEFAULT_EXECUTABLE=/usr/bin/python3 \
       -D BUILD_OPENCV_PYTHON3=yes \
       -D OPENCV_EXTRA_MODULES_PATH=~/Downloads/opencv_contrib/modules \
-      -D CMAKE_BUILD_TYPE=Release \
-      -D WITH_IPP=OFF \
+      -D OPENCV_ENABLE_NONFREE=ON \
+      -D CMAKE_BUILD_TYPE=RELEASE \
       -D BUILD_TESTS=OFF \
       -D BUILD_PERF_TESTS=OFF \
       -D BUILD_EXAMPLES=OFF \
+      -D INSTALL_PYTHON_EXAMPLES=OFF \
       -D ENABLE_PRECOMPILED_HEADERS=OFF \
       -D ENABLE_NEON=ON \
+      -D ENABLE_VFPV3=ON \
       -D WITH_INF_ENGINE=ON \
       -D INF_ENGINE_LIB_DIRS="/l_openvino_toolkit_runtime_raspbian_p_2019.3.334/deployment_tools/inference_engine/lib/armv7l" \
       -D INF_ENGINE_INCLUDE_DIRS="/l_openvino_toolkit_runtime_raspbian_p_2019.3.334/deployment_tools/inference_engine/include" \
