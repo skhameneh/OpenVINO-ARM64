@@ -207,6 +207,15 @@ $ sudo dpkg-reconfigure tzdata
 
 while you are inside the schroot environment.
 
+4. If you see a message like
+
+```
+E: 20nssdatabases: /usr/bin/stat: cannot stat '/etc/networks': No such file or directory
+E: buster_armhf-<xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx>: Chroot setup failed: stage=setup-start
+```
+
+after trying to enter the schroot environment you have to open the file `/etc/schroot/default/nssdatabases` and comment out the line containing the term `networks`.
+
 ## Contributing
 
 Feel free to fork and create a pull request or an issue if you have additional materials to add.
