@@ -12,15 +12,14 @@ https://github.com/opencv/dldt/issues/3
 
 # Version & Compatibility Notes
 
-## Ubuntu, OpenCV 4.1.1 and OpenVINO 2019 R2
+## Ubuntu, OpenCV 4.1.2 and OpenVINO 2019 R3
 
 1. OpenVINO only provides 32-bit 'armhf' libraries for Raspbian ('armhf' = Arm port using the hard-float ABI).
-2. OpenVINO binaries are only compiled for Python 2.7 and Python 3.5/3.7.
-3. Python 3 is preferred over Python 2.7 because of [this](https://pythonclock.org).
-4. OpenVINO R5 comes with OpenCV 4.1.1 compiled for Raspbian.
-5. Raspbian armhf modules are not fully compatible with other Linux distributions (broken links, dependencies, naming/version hell).
-6. Intel does not provide all sources for the OpenVINO libraries at this time.
-7. I suggest building OpenCV from source. The `cv2.so` provided by Intel may not work in all environments.
+2. Python 3 is preferred over Python 2.7 because of [this](https://pythonclock.org).
+3. OpenVINO 2019 R3 comes with OpenCV 4.1.2 compiled for Raspbian.
+4. Raspbian armhf modules are not fully compatible with other Linux distributions (broken links, dependencies, naming/version hell).
+5. Intel does not provide all sources for the OpenVINO libraries at this time.
+6. I suggest building OpenCV from source. The `cv2.so` provided by Intel may not work in all environments.
 
 # Installation
 
@@ -52,15 +51,15 @@ users=MYUSER
 
 Replace "MYUSER" with your username.
 
-## 3. Download OpenVINO 2019 R2 and configure host/schroot environment
+## 3. Download OpenVINO 2019 R3 and configure host/schroot environment
 
-Download OpenVINO 2019 R2 and copy the content of the archive into the schroot environment:
+Download OpenVINO 2019 R3 and copy the content of the archive into the schroot environment:
 
 ```
 $ cd ~/Downloads
-$ wget https://download.01.org/opencv/2019/openvinotoolkit/R2/l_openvino_toolkit_runtime_raspbian_p_2019.2.242.tgz
-$ tar -xf l_openvino_toolkit_runtime_raspbian_p_2019.2.242.tgz
-$ sudo cp -R ./l_openvino_toolkit_runtime_raspbian_p_2019.2.242 /srv/chroot/buster_armhf/
+$ wget https://download.01.org/opencv/2019/openvinotoolkit/R3/l_openvino_toolkit_runtime_raspbian_p_2019.3.334.tgz
+$ tar -xf l_openvino_toolkit_runtime_raspbian_p_2019.3.334.tgz
+$ sudo cp -R ./l_openvino_toolkit_runtime_raspbian_p_2019.3.334 /srv/chroot/buster_armhf/
 ```
 
 Add the user to the `users` group:
@@ -72,16 +71,16 @@ $ sudo usermod -a -G users "$(whoami)"
 Add udev rules for the NCSx stick:
 
 ```
-$ source ./l_openvino_toolkit_runtime_raspbian_p_2019.2.242/bin/setupvars.sh
-$ sh ./l_openvino_toolkit_runtime_raspbian_p_2019.2.242/install_dependencies/install_NCS_udev_rules.sh
+$ source ./l_openvino_toolkit_runtime_raspbian_p_2019.3.334/bin/setupvars.sh
+$ sh ./l_openvino_toolkit_runtime_raspbian_p_2019.3.334/install_dependencies/install_NCS_udev_rules.sh
 ```
 
 Copy the OpenVINO binaries to the schroot environment:
 
 ```
 $ sudo mkdir -p /srv/chroot/buster_armhf/usr/local/lib/python3.7/dist-packages
-$ sudo cp -R ./l_openvino_toolkit_runtime_raspbian_p_2019.2.242/python/python3.7/* /srv/chroot/buster_armhf/usr/local/lib/python3.7/dist-packages/
-$ sudo cp -R ./l_openvino_toolkit_runtime_raspbian_p_2019.2.242/deployment_tools/inference_engine/lib/armv7l/* /srv/chroot/buster_armhf/usr/local/lib/python3.7/dist-packages/openvino/inference_engine/
+$ sudo cp -R ./l_openvino_toolkit_runtime_raspbian_p_2019.3.334/python/python3.7/* /srv/chroot/buster_armhf/usr/local/lib/python3.7/dist-packages/
+$ sudo cp -R ./l_openvino_toolkit_runtime_raspbian_p_2019.3.334/deployment_tools/inference_engine/lib/armv7l/* /srv/chroot/buster_armhf/usr/local/lib/python3.7/dist-packages/openvino/inference_engine/
 ```
 
 Allow USB access inside the schroot environment:
@@ -108,7 +107,7 @@ Add the user to the `users` group:
 $ sudo usermod -a -G users "$(whoami)"
 ```
 
-## 4. Compile OpenCV 4.1.1 from source
+## 4. Compile OpenCV 4.1.2 from source
 
 ### Prerequisites
 
@@ -116,7 +115,7 @@ $ sudo usermod -a -G users "$(whoami)"
 $ sudo apt update
 $ sudo apt install wget python3-dev libgtk-3-dev libatlas-base-dev gfortran \
     build-essential cmake unzip pkg-config \
-    libjpeg-dev libpng-dev libtiff-dev \
+    libjpeg-dev libpng-dev libtiff-dev libssl-dev libffi-dev \
     libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
     libxvidcore-dev libx264-dev git pkg-config \
     python3-pip libtbb2 libtbb-dev libdc1394-22-dev
@@ -129,42 +128,39 @@ Install Numpy:
 $ sudo python3 -m pip install numpy
 ```
 
-### Download and prepare OpenCV 4.1.1
+### Download and prepare OpenCV 4.1.2
 
 ```
 $ cd ~/Downloads
-$ wget -O opencv.zip https://github.com/opencv/opencv/archive/4.1.1.zip
-$ wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/4.1.1.zip
+$ wget -O opencv.zip https://github.com/opencv/opencv/archive/4.1.2.zip
+$ wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/4.1.2.zip
 $ unzip opencv.zip
 $ unzip opencv_contrib.zip
-$ mv opencv-4.1.1/ opencv/
-$ mv opencv_contrib-4.1.1/ opencv_contrib/
+$ mv opencv-4.1.2/ opencv/
+$ mv opencv_contrib-4.1.2/ opencv_contrib/
 ```
 
-### Compile and install OpenCV 4.1.1
+### Compile and install OpenCV 4.1.2
 
 ```
 $ mkdir -p opencv/build
 $ cd opencv/build
 $ cmake -D CMAKE_INSTALL_PREFIX=/usr/local \
-      -D PYTHON3_EXECUTABLE=/usr/bin/python3 \
-      -D PYTHON3_LIBRARY=/usr/lib/python3.7/config-3.7m-arm-linux-gnueabihf/libpython3.7m.so \
-      -D PYTHON3_INCLUDE_DIR=/usr/include/python3.7m \
-      -D PYTHON3_PACKAGES_PATH=/usr/lib/python3/dist-packages \
-      -D PYTHON_DEFAULT_EXECUTABLE=/usr/bin/python3 \
       -D BUILD_OPENCV_PYTHON3=yes \
       -D OPENCV_EXTRA_MODULES_PATH=~/Downloads/opencv_contrib/modules \
-      -D CMAKE_BUILD_TYPE=Release \
-      -D WITH_IPP=OFF \
+      -D OPENCV_ENABLE_NONFREE=ON \
+      -D CMAKE_BUILD_TYPE=RELEASE \
       -D BUILD_TESTS=OFF \
       -D BUILD_PERF_TESTS=OFF \
       -D BUILD_EXAMPLES=OFF \
+      -D INSTALL_PYTHON_EXAMPLES=OFF \
       -D ENABLE_PRECOMPILED_HEADERS=OFF \
       -D ENABLE_NEON=ON \
+      -D ENABLE_VFPV3=ON \
       -D WITH_INF_ENGINE=ON \
-      -D INF_ENGINE_LIB_DIRS="/l_openvino_toolkit_runtime_raspbian_p_2019.2.242/deployment_tools/inference_engine/lib/armv7l" \
-      -D INF_ENGINE_INCLUDE_DIRS="/l_openvino_toolkit_runtime_raspbian_p_2019.2.242/deployment_tools/inference_engine/include" \
-      -D CMAKE_FIND_ROOT_PATH="/l_openvino_toolkit_runtime_raspbian_p_2019.2.242/" \
+      -D INF_ENGINE_LIB_DIRS="/l_openvino_toolkit_runtime_raspbian_p_2019.3.334/deployment_tools/inference_engine/lib/armv7l" \
+      -D INF_ENGINE_INCLUDE_DIRS="/l_openvino_toolkit_runtime_raspbian_p_2019.3.334/deployment_tools/inference_engine/include" \
+      -D CMAKE_FIND_ROOT_PATH="/l_openvino_toolkit_runtime_raspbian_p_2019.3.334/" \
       -D ENABLE_CXX11=ON ..
 $ make -j4
 $ sudo make install
@@ -202,6 +198,23 @@ while trying to execute a Python script inside the schroot environment, you need
 ```
 $ export LD_LIBRARY_PATH="/usr/local/lib/python3.7/dist-packages/openvino/inference_engine"
 ```
+
+3. Beware that the schroot environment does not align the time zone settings with the host system. If you want to set the time zone run
+
+```
+$ sudo dpkg-reconfigure tzdata
+```
+
+while you are inside the schroot environment.
+
+4. If you see a message like
+
+```
+E: 20nssdatabases: /usr/bin/stat: cannot stat '/etc/networks': No such file or directory
+E: buster_armhf-<xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx>: Chroot setup failed: stage=setup-start
+```
+
+after trying to enter the schroot environment you have to open the file `/etc/schroot/default/nssdatabases` and comment out the line containing the term `networks`.
 
 ## Contributing
 
